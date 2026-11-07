@@ -2036,10 +2036,11 @@ class MigratedComposer:
         """Click one radio and read ``aria-checked`` back; re-query once on a stale node."""
         radios = pane.locator(RADIO)
         wanted = text if text is not None else str(lig)
+        pattern = _duration(wanted) if axis == "duration" else _exact(wanted)
+        if axis == "count":
+            pattern = re.compile(r"^\s*x\s*" + re.escape(wanted.removeprefix("x")) + r"\s*$")
         matches = (
-            radios.filter(has=_ligature(page, lig))
-            if lig
-            else radios.filter(has_text=_duration(wanted) if axis == "duration" else _exact(wanted))
+            radios.filter(has=_ligature(page, lig)) if lig else radios.filter(has_text=pattern)
         )
         target = matches.first
         if not await target.count():

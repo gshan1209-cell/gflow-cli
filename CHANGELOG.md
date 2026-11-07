@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Accept whitespace between `x` and the output count in the flow.google.com
+  settings pane, so labels such as `x 1` select the requested count instead of
+  stopping before submission. Count matching remains anchored to the full value.
+
 ## [0.95.0] — 2026-11-07
 
 ### Added

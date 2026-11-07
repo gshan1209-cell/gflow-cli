@@ -880,6 +880,39 @@ async def test_apply_video_settings_selects_each_axis_and_reads_back() -> None:
     assert not page.dom.pane_open  # closed afterwards
 
 
+@pytest.mark.parametrize("separator", ["", " ", "\u00a0"])
+@pytest.mark.parametrize("count", [1, 2, 3, 4])
+async def test_count_radio_accepts_whitespace_and_selects_only_requested_count(
+    separator: str, count: int
+) -> None:
+    """Flow renders `x 1`; binding one output must not leave the default at two."""
+    from gflow_cli.api.transports.migrated_composer import MigratedComposer
+
+    page = FakePage()
+    page.dom.groups["count"] = [
+        Radio("", f"x{separator}{number}", checked=number == count % 4 + 1)
+        for number in range(1, 5)
+    ]
+    await MigratedComposer().apply_video_settings(page, _t2v(count=count))
+
+    assert [i + 1 for i, radio in enumerate(page.dom.groups["count"]) if radio.checked] == [count]
+    assert not page.dom.pane_open
+    assert page.dom.submit_clicked == 0
+
+
+async def test_count_radio_does_not_match_a_larger_count_prefix() -> None:
+    from gflow_cli.api.transports.migrated_composer import MigratedComposer
+
+    page = FakePage()
+    page.dom.groups["count"] = [Radio("", "x 10", checked=True)]
+
+    with pytest.raises(UiSelectorDriftError, match="count"):
+        await MigratedComposer().apply_video_settings(page, _t2v(count=1))
+
+    assert page.dom.groups["count"][0].checked
+    assert page.dom.submit_clicked == 0
+
+
 @pytest.mark.parametrize("unit", ["s", " giây", " Sek."])
 async def test_duration_is_matched_on_its_number_not_the_english_unit(unit: str) -> None:
     """#963: a Vietnamese pane reads `8 giây`, so `_exact("8s")` never matched and every
