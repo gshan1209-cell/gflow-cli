@@ -431,6 +431,11 @@ class TestVerifyFlowSession:
         fake_async_playwright = MagicMock(side_effect=RuntimeError("no browser here"))
 
         with (
+            # This test mocks Playwright; its Chrome precondition must not probe the host.
+            patch(
+                "gflow_cli.browser_manager.is_playwright_chrome_channel_available",
+                return_value=True,
+            ),
             patch("gflow_cli.auth.verification.get_settings", **NO_PROXY) as mock_settings,
             patch(
                 "gflow_cli.auth.cookies.get_cookies_path",
@@ -489,6 +494,11 @@ class TestVerifyFlowSession:
         )
 
         with (
+            # This test mocks Playwright; its Chrome precondition must not probe the host.
+            patch(
+                "gflow_cli.browser_manager.is_playwright_chrome_channel_available",
+                return_value=True,
+            ),
             patch("gflow_cli.auth.verification.get_settings", **NO_PROXY) as mock_settings,
             patch(
                 "gflow_cli.auth.cookies.get_cookies_path",
